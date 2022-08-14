@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
-import { IProxyAdder } from './interfaces/IProxyAdder.sol';
+import { IProxyAdder } from '../interfaces/IProxyAdder.sol';
 
 library LibContractProxy {
   bytes32 constant PROXY_STORAGE_POSITION = keccak256('libcontractproxy.standard.libcontractproxy.storage');

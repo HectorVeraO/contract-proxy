@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.4.22 <0.9.0;
 
-import { LibContractProxy } from './LibContractProxy.sol';
+import { LibContractProxy } from './libraries/LibContractProxy.sol';
 import { IProxyAdder } from './interfaces/IProxyAdder.sol';
 
 contract ContractProxy {
