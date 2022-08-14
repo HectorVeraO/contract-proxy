@@ -1,0 +1,12 @@
+Contract hub is a contract with the following features:
+1. Mutable set of FacetInterfaces (polymorphism)
+2. Incrementable set of managed contracts
+3. Mutable set of allowed interfaces for managed contracts
+4. Can deploy managed contracts (might be doable with mload mstore and create / create2)
+5. Allows interactions with managed contracts (for now managed contracts will behave
+   as "facets" of the hub which means the managed contracts have the state within the hub
+   so the hub just "borrows" their behaviour but maybe they should be responsible for their state)
+
+
+
+

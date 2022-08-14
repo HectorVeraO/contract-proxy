@@ -22,6 +22,7 @@ library LibContractProxy {
   // something like mapping(address => &ContractState) or mapping(uint256 => &ContractState)
   struct ProxyStorage {
     address owner;
+    address[] contractAddresses;
     mapping(address => ContractState) contractStateByAddr;
   }
 
@@ -80,5 +81,6 @@ library LibContractProxy {
 
     ContractState storage cs = ps.contractStateByAddr[_descriptor.addr];
     cs.addr = _descriptor.addr;
+    ps.contractAddresses.push(_descriptor.addr);
   }
 }
