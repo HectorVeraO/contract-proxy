@@ -58,4 +58,6 @@ contract ContractProxy {
         }
     }
   }
+
+  receive() external payable {}
 }
