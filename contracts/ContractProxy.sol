@@ -29,7 +29,9 @@ contract ContractProxy {
     // item 02: w/e, 32 bytes
     // item 03: w/e, 32 bytes and so on...
 
-    // For this first draft I'll define a single parameter for the fallback which is the address of the contract to call
+    // For this first draft I'll define two parameters for the fallback which is the address of the contract to call
+    // and a single bit right after the address to indicate whether the contract is a facet or not (albeit this could be avoided
+    // by keeping track of the addresses included in the proxy)
     // so the calldata layout (for calldatasize = n) it's something like:
     // bytes: [00,  03] -> delegated contract function sig
     // bytes: [04,  23] -> delegated contract address
@@ -52,7 +54,7 @@ contract ContractProxy {
 
       let g := gas()
       let a := requestedContractAddr
-      let v := mul(g, 1000000000)
+      let v := mul(g, 1000000000) // FIXME: This should be computed with the wei received for the transaction minus whatever wei will be used by the fallback itself
       let _in := 0
       let _insize := methodCalldataSize
       let _out := 0
@@ -61,7 +63,7 @@ contract ContractProxy {
       
       switch isFacet
         case 0 {
-          result := call(g, a, 0, _in, _insize, _out, _outsize)
+          result := call(g, a, 0, _in, _insize, _out, _outsize) // FIXME: Pass in v as the third argument
         }
         default {
           result := delegatecall(g, a, _in, _insize, _out, _outsize)
