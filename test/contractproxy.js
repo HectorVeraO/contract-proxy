@@ -41,7 +41,7 @@ contract('ContractProxy', (accounts) => {
     console.log(`mint.encodeCall = ${JSON.stringify(encodeCall)}`);
     const payload =  encodeFallbackCall(encodeCall, removeHexPrefix(erc721Instance.address));
     console.log(`mint.payload = ${JSON.stringify(payload)}`);
-    const receipt = await web3.eth.sendTransaction({ from: owner, to: ContractProxy.address, gas: '9000000000000000', gasPrice: '1', value: 1, data: payload })
+    const receipt = await web3.eth.sendTransaction({ from: owner, to: ContractProxy.address, gas: '9000000000000000', data: payload })
     console.log(`mint.receipt = ${JSON.stringify(receipt)}`);
     return receipt;
   }
