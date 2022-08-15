@@ -22,5 +22,8 @@
   "homepage": "https://github.com/HectorVeraO/contract-proxy#readme",
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.3"
+  },
+  "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.15"
   }
 }

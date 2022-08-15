@@ -32,11 +32,14 @@ contract ContractProxy {
     // For this first draft I'll define a single parameter for the fallback which is the address of the contract to call
     // so the calldata layout (for calldatasize = n) it's something like:
     // bytes: [00,  03] -> delegated contract function sig
-    // bytes: [04,  19] -> delegated contract address
-    // bytes: [20,  35] -> padding
+    // bytes: [04,  23] -> delegated contract address
+    // bytes: [24,  24] -> if set use delegatecall else use call
+    // bytes: [25,  35] -> padding
     // bytes: [36, n-1] -> delegated contract function arguments
-    bytes20 requestedContractAddrBytes = bytes20(msg.data[4:(20 + 4)]);
+    bytes20 requestedContractAddrBytes = bytes20(msg.data[4:24]);
     address requestedContractAddr = address(requestedContractAddrBytes);
+    bytes12 flags = bytes12(msg.data[24:36]);
+    bytes12 isFacet = flags >> 92; // bytelen = 12 -> 24 hexlen -> offset 23 hexchars and 4 bits = 1 hexchar -> 4 * 23 = 92
   
     assembly {
       let argumentsOffset := 36 // fallback's calldatasize minus 36 bytes (4 bytes for sig and 32 bytes for the address)
@@ -46,7 +49,23 @@ contract ContractProxy {
       calldatacopy(sigSize, argumentsOffset, argumentsSize) // push function arguments to mem
 
       let methodCalldataSize := add(sigSize, argumentsSize)
-      let result := delegatecall(gas(), requestedContractAddr, 0, methodCalldataSize, 0, 0)
+
+      let g := gas()
+      let a := requestedContractAddr
+      let v := mul(g, 1000000000)
+      let _in := 0
+      let _insize := methodCalldataSize
+      let _out := 0
+      let _outsize := 0
+      let result := 0
+      
+      switch isFacet
+        case 0 {
+          result := call(g, a, 0, _in, _insize, _out, _outsize)
+        }
+        default {
+          result := delegatecall(g, a, _in, _insize, _out, _outsize)
+        }
       returndatacopy(0, 0, returndatasize()) // push response to mem
 
       switch result

@@ -1,4 +1,4 @@
-const { functionInterfaceByName, removeHexPrefix, concatHexStrings } = require("../scripts/web3-utills");
+const { functionInterfaceByName, removeHexPrefix, concatHexStrings, toContractDescriptor, encodeFallbackDelegateCall, decodeFallbackReturndata } = require("../scripts/web3-utills");
 
 const ProxyAdder = artifacts.require('ProxyAdder');
 const ProxyLoupe = artifacts.require('ProxyLoupe');
@@ -28,16 +28,6 @@ module.exports = async (deployer, _, accounts) => {
   const adderInstance = await ProxyAdder.deployed();
   const loupeInstance = await ProxyLoupe.deployed();
 
-  const toContractDescriptor = (address) => ({ addr: address });
-  const leBytes32Str = (str) => str.padStart(64, '0');
-  const beBytes32Str = (str) => str.padEnd(64, '0');
-  const encodeFallbackCalldata = (fcall, caddr) => concatHexStrings(fcall.slice(0, 10), beBytes32Str(caddr), fcall.slice(10));
-  const decodeFallbackReturndata = (contract, methodName, returndata) => {
-    const interface = contract.abi.filter(interface => interface.name === methodName)[0];
-    const returnTypes = interface.outputs;
-    return web3.eth.abi.decodeParameters(returnTypes, returndata);
-  };
-
   {
     console.log(`Adding Loupe to Proxy...`);
     console.log(`Preparing Adder.addContracts call via Proxy's fallback`);
@@ -49,9 +39,9 @@ module.exports = async (deployer, _, accounts) => {
     console.log(`adderAddr = ${adderAddr}`);
 
     // function sig + addr (padded to 32 bytes) + function args
-    const payload = encodeFallbackCalldata(encodedCall, adderAddr);
+    const payload = encodeFallbackDelegateCall(encodedCall, adderAddr);
     console.log(`payload = ${payload}`);
-    const receipt = await web3.eth.sendTransaction({ from: accounts[0], to: ContractProxy.address, gas: '6721975', data: payload })
+    const receipt = await web3.eth.sendTransaction({ from: accounts[0], to: ContractProxy.address, gas: '9000000000000000', data: payload })
     console.log(str(receipt));
   }
 
@@ -63,11 +53,11 @@ module.exports = async (deployer, _, accounts) => {
     const loupeAddr = removeHexPrefix(ProxyLoupe.address);
     console.log(`loupeAddr = ${loupeAddr}`);
 
-    const payload = encodeFallbackCalldata(encodedCall, loupeAddr);
+    const payload = encodeFallbackDelegateCall(encodedCall, loupeAddr);
     console.log(`payload = ${payload}`);
-    const returndata = await web3.eth.call({ from: accounts[0], to: ContractProxy.address, gas: '6721975', data: payload })
+    const returndata = await web3.eth.call({ from: accounts[0], to: ContractProxy.address, gas: '9000000000000000', data: payload })
     console.log(`returndata = ${str(returndata)}`);
-    const decodedReturndata = decodeFallbackReturndata(ProxyLoupe, 'contracts', returndata);
+    const decodedReturndata = decodeFallbackReturndata(web3, ProxyLoupe, 'contracts', returndata);
     console.log(`decodedReturndata = ${str(decodedReturndata)}`);
   }
 };
