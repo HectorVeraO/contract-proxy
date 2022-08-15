@@ -38,10 +38,12 @@ contract('ContractProxy', (accounts) => {
 
   const mint = async (erc721Instance, toAddr) => {
     const encodeCall = erc721Instance.contract.methods.safeMint(toAddr).encodeABI();
+    console.log(`mint.encodeCall = ${JSON.stringify(encodeCall)}`);
     const payload =  encodeFallbackCall(encodeCall, removeHexPrefix(erc721Instance.address));
-    const returndata = await web3.eth.call({ from: owner, to: ContractProxy.address, gas: '9000000000000000', data: payload  })
-    const decoded = decodeFallbackReturndata(web3, erc721Instance, 'safeMint', returndata);
-    return decoded;
+    console.log(`mint.payload = ${JSON.stringify(payload)}`);
+    const receipt = await web3.eth.sendTransaction({ from: owner, to: ContractProxy.address, gas: '9000000000000000', data: payload  })
+    console.log(`mint.receipt = ${JSON.stringify(receipt)}`);
+    return receipt;
   }
 
   const transferOwnership = async (erc721Instance, toAddr) => {
@@ -111,11 +113,19 @@ contract('ContractProxy', (accounts) => {
     assert.equal(dpscontractOwner, proxyInstance.address, `DumbPrestigeSkin contract should belong to ${proxyInstance.address} but it's owned by ${dpscontractOwner}`);
   });
 
-  it('should mint a dragonlore', async () => {
+  it('should mint a dragonlore via proxy call', async () => {
     const dlowner1 = accounts[1];
     const receipt = await mint(nft.dragonlore, dlowner1);
     console.log(`Something here ${JSON.stringify(receipt)}?`);
     const balance = await balanceOf(nft.dragonlore, dlowner1);
     assert.equal(balance, 1, `${dlowner1} should own 1 dragonlore but has ${balance}`);
+  });
+
+  it('should mint a dumbPrestigeSkin via proxy call', async () => {
+    const dpsowner1 = accounts[1];
+    const receipt = await mint(nft.dumbPrestigeSkin, dpsowner1);
+    console.log(`Something here ${JSON.stringify(receipt)}?`);
+    const balance = await balanceOf(nft.dumbPrestigeSkin, dpsowner1);
+    assert.equal(balance, 1, `${dpsowner1} should own 1 dumbPrestigeSkin but has ${balance}`);
   });
 });

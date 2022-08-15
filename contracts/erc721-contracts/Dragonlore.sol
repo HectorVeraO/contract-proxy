@@ -16,8 +16,13 @@ contract Dragonlore is ERC721, Ownable {
         return "http://localhost:3009/csgonft/";
     }
 
+    event Beg();
+    event BegSafeMint(address to, uint256 tokenId);
+
     function safeMint(address to) public onlyOwner {
+        emit Beg();
         uint256 tokenId = _tokenIdCounter.current();
+        emit BegSafeMint(to, tokenId);
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);
     }
