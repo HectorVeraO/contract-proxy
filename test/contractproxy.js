@@ -11,7 +11,7 @@ const Strawhat = artifacts.require('Strawhat');
 
 // FIXME: For now I'll assume the proxy has been deployed
 contract('ContractProxy', (accounts) => {
-  const nft = { dragonlore: null, dumbPrestigeSkin: null };
+  const nft = { dragonlore: null, dumbPrestigeSkin: null, strawhat: null };
 
   const owner = accounts[0];
   let proxyInstance = null;
@@ -126,7 +126,6 @@ contract('ContractProxy', (accounts) => {
   it('should mint a dragonlore via proxy call', async () => {
     const dlowner1 = accounts[1];
     const receipt = await mint(nft.dragonlore, dlowner1);
-    console.log(`Something here ${JSON.stringify(receipt)}?`);
     const balance = await balanceOf(nft.dragonlore, dlowner1);
     assert.equal(balance, 1, `${dlowner1} should own 1 dragonlore but has ${balance}`);
   });
@@ -134,7 +133,6 @@ contract('ContractProxy', (accounts) => {
   it('should mint a dumbPrestigeSkin via proxy call', async () => {
     const dpsowner1 = accounts[1];
     const receipt = await mint(nft.dumbPrestigeSkin, dpsowner1);
-    console.log(`Something here ${JSON.stringify(receipt)}?`);
     const balance = await balanceOf(nft.dumbPrestigeSkin, dpsowner1);
     assert.equal(balance, 1, `${dpsowner1} should own 1 dumbPrestigeSkin but has ${balance}`);
   });
@@ -143,9 +141,16 @@ contract('ContractProxy', (accounts) => {
     const expectedStrawhatAddr = await deployObject(Strawhat, DeployObjectAction.CALL);
     console.log(`expectedStrawhatAddr = ${expectedStrawhatAddr}`);
     const receipt = await deployObject(Strawhat, DeployObjectAction.TRANSACT);
-    const strawhatInstance = await Strawhat.at(expectedStrawhatAddr);
-    await proxify([strawhatInstance]);
+    nft.strawhat = await Strawhat.at(expectedStrawhatAddr);
+    await proxify([nft.strawhat]);
     const managedContracts = await getManagedContracts();
     assert.equal(managedContracts.has(expectedStrawhatAddr), true, `Strawhat is not a managed contract`);
+  });
+
+  it('should mint a strawhat via proxy call', async () => {
+    const mgwsowner1 = accounts[1];
+    const receipt = await mint(nft.strawhat, mgwsowner1);
+    const balance = await balanceOf(nft.strawhat, mgwsowner1);
+    assert.equal(balance, 1, `${mgwsowner1} should own 1 strawhat but has ${balance}`);
   });
 });
